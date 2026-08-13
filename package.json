@@ -1,7 +1,7 @@
 {
   "name": "slack-coding-agent",
   "version": "0.1.1",
-  "description": "A starting point for your coding agent.",
+  "description": "A Slack-triggered coding agent that works a granted GitHub repository through to a pull request.",
   "keywords": [
     "pi-package",
     "pi-coding-agent",
@@ -22,6 +22,25 @@
   "pi": {
     "agents": [
       "./agents/*.yaml"
-    ]
+    ],
+    "extensions": [
+      "./extensions/ralph-loop.mjs"
+    ],
+    "mcp": {
+      "servers": [
+        {
+          "id": "slack",
+          "required": true,
+          "tools": {
+            "include": [
+              "send_message",
+              "react",
+              "read_thread",
+              "get_permalink"
+            ]
+          }
+        }
+      ]
+    }
   }
 }

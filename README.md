@@ -1,80 +1,48 @@
-# Starter Template
+# Slack Coding Agent
 
-A minimal Pi coding agent with repository inspection, shell, and file-editing tools.
+A Slack-triggered Pi recipe that lazily clones one granted GitHub repository, implements a coding request, verifies it, opens a pull request, and reports progress in the originating Slack thread.
 
-## Quick start
+The recipe uses the runtime repository-grant model introduced by introspection-cloud PR #2242: `runtime.github.repositories` authorizes the repository without making it an eager task checkout. At task time the agent resolves the sole grant and uses normal HTTPS `git clone` and `gh` commands with short-lived managed credentials.
 
-Install Node.js 24 or newer and the Introspection CLI, then create your own recipe from this template. `init` also installs the compatible Pi harness and Recipes extension.
+## Package shape
 
-```bash
-npm install -g @introspection-ai/cli
-introspection init coding-agent template-starter
-cd coding-agent
-```
+- `SYSTEM.md` defines the repository, Slack, safety, and memory workflow.
+- `agents/agent.yaml` selects the managed model, built-in tools, Ralph checkpoint tool, and four Slack MCP tools.
+- `extensions/ralph-loop.mjs` continues non-terminal work through structured `ralph_status` checkpoints, with a finite safety ceiling.
+- `slack-app/manifest.template.json` and `scripts/configure-slack-app.mjs` create or update the Slack app through Slack's Manifest API.
+- `.introspection/slack-coding-agent.yaml` declares the GitHub grant; deployment binds the required `slack` connector to the runtime environment.
 
-Validate the recipe and start a fresh local Pi session:
+## Repository prerequisite
 
-```bash
-introspection local --runtime coding-agent
-```
+The manifest currently targets `tfidfwastaken/openclaw`, the intended writable fork of `openclaw/openclaw`. Create and register that fork with the Introspection project before deployment, or replace the slug with another registered writable repository. The agent never pushes directly to an upstream repository it cannot write.
 
-Ask:
+## Slack app bootstrap
 
-> Inspect this repository and summarize its structure. Do not change any files.
-
-The local loop needs no Introspection login or cloud runtime. Pi may ask you to configure the model provider on the first run.
-
-## Move the recipe through its lifecycle
-
-The everyday flow is:
-
-```text
-Local Pi → Development → Staging → Production → Learn and repeat
-```
-
-### 1. Change and prove it locally
-
-Customize `SYSTEM.md` and `agents/agent.yaml`, then repeat the local prompt above in fresh sessions. Test any new tools or instructions as well as ordinary coding requests that should keep working.
-
-### 2. Create the runtime and test development
-
-Development requires the recipe's first runtime. Commit the locally proven recipe, push it to your own GitHub repository, then:
-
-1. In the Introspection app, open your organization's **Integrations** page and grant the Introspection GitHub App access to the repository.
-2. Open the target project, go to **Runtimes**, and select **New runtime**.
-3. Choose the repository and the runtime in `.introspection/coding-agent.yaml`, confirm that its recipe path is `.`, and create the first version from `main`.
-4. In **Versions**, confirm that the immutable version's recipe commit matches the `main` commit you intended to deploy.
-
-Once the runtime exists, exercise uncommitted changes through the cloud development path:
+Create the Introspection Slack connector first so you have its OAuth redirect and Events API request URLs. Generate a short-lived Slack app configuration token, then run:
 
 ```bash
-introspection login
-introspection dev --runtime coding-agent
+export SLACK_APP_CONFIG_TOKEN='...'
+export SLACK_OAUTH_REDIRECT_URL='https://...'
+export SLACK_EVENTS_REQUEST_URL='https://...'
+node scripts/configure-slack-app.mjs
 ```
 
-Leave the command running, open the development chat URL it prints, and repeat the repository-summary prompt. Saved changes to `SYSTEM.md` or `agents/agent.yaml` are picked up without a commit or push. Stopping `introspection dev` removes the local overlay; it does not deploy a version.
+The script validates and creates the app programmatically. It prints no Slack secret; the creation response is written to ignored `.slack/credentials.json` with mode `0600`. Set `SLACK_APP_ID` to update an existing app. A human must still approve Slack's workspace OAuth consent URL.
 
-### 3. Verify a pull-request candidate in staging
+Store the returned client and signing credentials in the Introspection connector through the deployment workflow. Never commit `.slack/credentials.json` or configuration tokens.
 
-Push a feature branch and open a pull request. The GitHub integration creates an immutable candidate version for that commit; do not create another runtime for the same agent.
+## Memory
 
-In the runtime's **Versions** view, find the candidate by branch and commit, pin it to **Staging**, and select **Preview**. Repeat the repository-summary prompt and confirm that the conversation used the intended candidate commit without an unhandled error.
+When an authenticated task has durable memory, the agent maintains a concise `/workspace/memories/MEMORY.md` index and per-repository notes under `/workspace/memories/repos/`. It stores verified conventions and preferences only. Memory remains environment- and owner-scoped and is never used for secrets or transient task state.
 
-### 4. Merge it to production
+## Validate
 
-After the staging behavior and pull request are approved, merge into the repository's configured production branch. The GitHub integration creates the immutable version and activates it for production; there is no separate promotion command.
+```bash
+introspection check
+```
 
-Run one small production check through the stable `coding-agent` runtime and confirm that it resolves to the merged recipe commit.
+The live capability check belongs in staging because local Pi cannot faithfully reproduce Slack ingress or the managed GitHub credential helper.
 
-### 5. Learn and repeat
+## License
 
-Use production conversations and recurring patterns to choose the smallest useful change, then return to the local loop. See the [agent development lifecycle](https://docs.introspection.dev/guides/development-lifecycle) for the full workflow.
-
-## What's included
-
-- A ready-to-run Pi coding agent
-- Shared behavior in `SYSTEM.md`
-- Model and tool configuration in `agents/agent.yaml`
-- Runtime metadata in `.introspection/coding-agent.yaml`
-
-[Read the Recipes documentation →](https://docs.introspection.dev/recipes)
+Apache-2.0. The starter template attribution and license are preserved in `LICENSE`.
