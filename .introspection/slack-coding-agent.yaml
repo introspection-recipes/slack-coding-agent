@@ -1,5 +1,11 @@
 name: slack-coding-agent
 path: .
-description: Customizable Pi coding agent
+description: Slack-triggered coding agent with a bounded Ralph continuation loop
 runtime:
   llm_mode: managed
+  github:
+    repositories:
+      - tfidfwastaken/openclaw
+    permissions:
+      contents: write
+      pull_requests: write
