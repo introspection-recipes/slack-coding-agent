@@ -1,0 +1,27 @@
+{
+  "name": "slack-coding-agent",
+  "version": "0.1.1",
+  "description": "A starting point for your coding agent.",
+  "keywords": [
+    "pi-package",
+    "pi-coding-agent",
+    "managed-agent",
+    "recipe"
+  ],
+  "type": "module",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "prepare": "git config core.hooksPath .githooks || true"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-agent-core": "*",
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "pi": {
+    "agents": [
+      "./agents/*.yaml"
+    ]
+  }
+}
