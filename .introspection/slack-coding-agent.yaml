@@ -3,6 +3,8 @@ path: .
 description: Slack-triggered coding agent with a bounded Ralph continuation loop
 runtime:
   llm_mode: managed
+  connectors:
+    - slack
   github:
     repositories:
       - tfidfwastaken/openclaw
