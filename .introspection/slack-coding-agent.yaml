@@ -5,7 +5,7 @@ runtime:
   llm_mode: managed
   github:
     repositories:
-      - tfidfwastaken/openclaw
+      - your-org/your-repo
     permissions:
       contents: write
       pull_requests: write

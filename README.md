@@ -14,7 +14,11 @@ The recipe uses the runtime repository-grant model: `runtime.github.repositories
 
 ## Repository prerequisite
 
-The manifest currently targets `tfidfwastaken/openclaw`, the intended writable fork of `openclaw/openclaw`. Create and register that fork with the Introspection project before deployment, or replace the slug with another registered writable repository. The agent never pushes directly to an upstream repository it cannot write.
+The manifest ships a placeholder, `your-org/your-repo`. Replace it with a repository you can write to that is already registered with the Introspection project.
+
+An unregistered slug does not fail the deploy. It is logged and skipped, so a runtime still carrying the placeholder starts normally and simply has no repository to work in, and the agent reports that it cannot find one.
+
+The agent opens pull requests and never pushes directly to an upstream it cannot write.
 
 ## Slack setup (shortest path)
 
