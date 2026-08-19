@@ -1,0 +1,11 @@
+name: slack-coding-agent
+path: .
+description: Slack-triggered coding agent with a bounded Ralph continuation loop
+runtime:
+  llm_mode: managed
+  github:
+    repositories:
+      - your-org/your-repo
+    permissions:
+      contents: write
+      pull_requests: write

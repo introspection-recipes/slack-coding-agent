@@ -1,0 +1,46 @@
+{
+  "name": "slack-coding-agent",
+  "version": "0.1.1",
+  "description": "A Slack-triggered coding agent that works a granted GitHub repository through to a pull request.",
+  "keywords": [
+    "pi-package",
+    "pi-coding-agent",
+    "managed-agent",
+    "recipe"
+  ],
+  "type": "module",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "prepare": "git config core.hooksPath .githooks || true"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-agent-core": "*",
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "pi": {
+    "agents": [
+      "./agents/*.yaml"
+    ],
+    "extensions": [
+      "./extensions/ralph-loop.mjs"
+    ],
+    "mcp": {
+      "servers": [
+        {
+          "id": "slack",
+          "required": true,
+          "tools": {
+            "include": [
+              "send_message",
+              "react",
+              "read_thread",
+              "get_permalink"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+name: agent
+description: Completes repository coding tasks received from Slack and opens focused pull requests.
+model:
+  name: anthropic/claude-sonnet-4-6
+  thinking_level: medium
+tools:
+  - read
+  - bash
+  - edit
+  - write
+  - ralph_status
+skills: []
+subagents: []
+mcp:
+  mode: tools
+  servers:
+    slack:
+      include:
+        - send_message
+        - react
+        - read_thread
+        - get_permalink
+system_instructions:
+  mode: append
+  content: |
+    You are the sole implementation agent. Own the requested change from repository discovery through a verified pull request or a precise blocker.
