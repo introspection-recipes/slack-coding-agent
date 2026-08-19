@@ -2,7 +2,7 @@
 
 A Slack-triggered Pi recipe that lazily clones one granted GitHub repository, implements a coding request, verifies it, opens a pull request, and reports progress in the originating Slack thread.
 
-The recipe uses the runtime repository-grant model introduced by introspection-cloud PR #2242: `runtime.github.repositories` authorizes the repository without making it an eager task checkout. At task time the agent resolves the sole grant and uses normal HTTPS `git clone` and `gh` commands with short-lived managed credentials.
+The recipe uses the runtime repository-grant model: `runtime.github.repositories` authorizes the repository without making it an eager task checkout. At task time the agent resolves the sole grant and uses normal HTTPS `git clone` and `gh` commands with short-lived managed credentials.
 
 ## Package shape
 
@@ -18,12 +18,9 @@ The manifest currently targets `tfidfwastaken/openclaw`, the intended writable f
 
 ## Slack setup (shortest path)
 
-Deploy the recipe first so the runtime `slack-coding-agent` exists. For local Introspection development, also keep the public webhook relay running in another terminal:
+Deploy the recipe first so the runtime `slack-coding-agent` exists.
 
-```bash
-cd /path/to/introspection-cloud
-make dev-relay
-```
+`<control-plane-host>` below is the API host your CLI is logged into, which `introspection whoami` prints as the base URL. Slack has to reach that host over the public internet to verify the events URL.
 
 1. At [api.slack.com/apps](https://api.slack.com/apps), create a **Blank app** in the target workspace. On **Basic Information**, copy its Client ID, Client Secret, and Signing Secret.
 
@@ -62,15 +59,15 @@ unset SLACK_CLIENT_SECRET SLACK_SIGNING_SECRET
 3. Copy the connector `id` from the command output. In the Slack app's **App Manifest** page, paste [`slack-app/manifest.template.json`](slack-app/manifest.template.json), replacing its two placeholders with:
 
 ```text
-SLACK_OAUTH_REDIRECT_URL=http://localhost:8000/v1/oauth/connections/callback
-SLACK_EVENTS_REQUEST_URL=https://api.development.introspection.dev/v1/webhooks/slack/<connector-id>
+SLACK_OAUTH_REDIRECT_URL=https://<control-plane-host>/v1/oauth/connections/callback
+SLACK_EVENTS_REQUEST_URL=https://<control-plane-host>/v1/webhooks/slack/<connector-id>
 ```
 
 Save the manifest and confirm that Slack marks the Events API request URL **Verified**. Then activate the same URL on the connector:
 
 ```bash
 introspection connectors update slack \
-  --webhook-url 'https://api.development.introspection.dev/v1/webhooks/slack/<connector-id>' \
+  --webhook-url 'https://<control-plane-host>/v1/webhooks/slack/<connector-id>' \
   --status active \
   --yes --non-interactive
 ```
@@ -85,7 +82,7 @@ introspection connectors authorize slack \
 
 5. In a Slack channel, run `/invite @Coding Agent`, then send `@Coding Agent inspect the repository and summarize its structure`.
 
-After authorization succeeds, delete `secret-file`; the encrypted connector copy is the source of truth. For a hosted control plane, replace the localhost callback and development relay hostname with that environment's public URLs.
+After authorization succeeds, delete `secret-file`; the encrypted connector copy is the source of truth.
 
 ## Memory
 
