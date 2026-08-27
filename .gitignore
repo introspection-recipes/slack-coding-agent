@@ -6,3 +6,6 @@
 # Local Slack app bootstrap credentials and config tokens
 .slack/
 .env
+
+# Dependencies
+node_modules/
